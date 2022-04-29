@@ -1,0 +1,29 @@
+
+Subset: train
+ qt: MAE = 3.0962, RMSE = 4.0947
+ pr: MAE = 3.6065, RMSE = 4.7735
+ qrs: MAE = 2.1222, RMSE = 2.8172
+ STJ_v5: MAE = 5.7752, RMSE = 7.5142
+ T_PeakAmpl_v5: MAE = 6.1027, RMSE = 9.5591
+ R_PeakAmpl_v5: MAE = 23.3224, RMSE = 54.7141
+ VentRate: MAE = 0.4550, RMSE = 0.5995
+
+Subset: validation
+ qt: MAE = 3.5392, RMSE = 5.2015
+ pr: MAE = 4.7542, RMSE = 6.8846
+ qrs: MAE = 2.8878, RMSE = 4.3218
+ STJ_v5: MAE = 7.9035, RMSE = 11.0990
+ T_PeakAmpl_v5: MAE = 6.6974, RMSE = 12.2891
+ R_PeakAmpl_v5: MAE = 28.6412, RMSE = 104.4966
+ VentRate: MAE = 0.6291, RMSE = 1.1387
+
+Subset: test
+ qt: MAE = 3.5744, RMSE = 5.3312
+ pr: MAE = 4.7791, RMSE = 7.0727
+ qrs: MAE = 2.8701, RMSE = 4.2533
+ STJ_v5: MAE = 7.8565, RMSE = 10.9753
+ T_PeakAmpl_v5: MAE = 6.5718, RMSE = 11.0179
+ R_PeakAmpl_v5: MAE = 27.6982, RMSE = 96.1306
+ VentRate: MAE = 0.6370, RMSE = 1.0840
+
+
