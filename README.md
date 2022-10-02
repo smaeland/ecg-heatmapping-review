@@ -1,11 +1,5 @@
 # ecg-heatmapping-review
 
-## TODO:
-
-- [ ] Compile list of test events for plotting, with PR etc values (no missing)
-- [x] Compute MSE on test set
-- [ ] Check and retrain STJ models
-- [ ] Debug deconvolution heatmap -- problem with inplace ReLUs? 
 
 
 ## Usage
