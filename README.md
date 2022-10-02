@@ -23,6 +23,8 @@ All these methods are provided by the Captum library, and are documented in the 
 
 > Note: Many of the methods are by default set to compute the results and then multiply it by the input (e.g. `DeepLift(model, multiply_by_inputs=True, ...)`), which is the basis of the input*gradients method. To avoid mixing methods, we use `multiply_by_inputs=True` for all methods that support it.
 
+In addition, layer-wise relevance propagation (LRP, [API docs](https://captum.ai/api/lrp.html)) is implemented, but does not seem to do anything useful. Feel free to experiment with this one.
+
 For evaluation of the methods, the first step is to compute the heatmaps for a representative set of single ECGs, and compare them visually. This requires some medical experience. The second step is without a human in the loop, where we for each ECG samples, iteratively
  - use the heatmap to select the most important data point
  - randomise the data at this point
@@ -42,10 +44,9 @@ mkdir ecg-heatmapping && cd ecg-heatmapping
 git clone git@github.com:smaeland/ecg-heatmapping-review.git
 ```
 
-
 ## Data
 On eX3, copy the data files in HDF5 format from this location
-```
+```bash
 mkdir data && cd data
 cp -r /home/steffen/D1/projects/ecg/data/ECG_8lead_median_Run4_hdf5 . 
 cd ..
@@ -76,51 +77,78 @@ source venv/bin/activate
 ## Usage
 
 If starting from CSV files, convert median data and sample info to HDF5:
-```
+```bash
 python convert_csv_to_hdf5.py
 ```
 Otherwise, skip this step.
 
-Train StevenNet model:
-```
+Train StevenNet model locally:
+```bash
+cd ecg-heatmapping-review
+mkdir models
 python train_medians.py -target qt -output_name_tag stevennet
-# or
+``` 
+Possible targets are `VentRate`, `qt`, `pr`, `qrs`, `STJ_v5`, `T_PeakAmpl_v5`, `R_PeakAmpl_v5`. `output_name_tag` is a name of you own choosing, that wil be appended to the model save file. 
+Note that for the amplitudes and for PR, some samples might not have a true value, and has to be skipped. In this case there will be a "pre-check" which takes a while to run, before the actual training starts.
+
+To train on the batch system:
+```bash
 sbatch train_model.sh
 ```
+In the `train_model.sh` file, uncomment the lines corresponding to the model you wish to train.
 
-Compute model performance metrics
-```
+**_Technical note:_** If running on the HGX2 or the A100 nodes, there is a missing library needed by pytorch. If you are not able to run pytorch on these nodes, copy over the missing library manually:
+```bash
+cp -r /home/steffen/D1/projects/ecg/ecg-heatmapping-review/lib .
+``` 
+
+Compute model performance metrics for the newly trained models: Edit `evaluate_model.py` so that `model_savefile_mapping` points to the correct save files, then run
+```bash
 python evaluate_model.py
 # or
-sbatch evluate_model_metrics.sh
+sbatch evaluate_model_metrics.sh
 ```
 
 Get a list of events from test dataset with complete metadata
-```
+```bash
 python events_for_plotting.py
 ```
 
-Create a heatmap
-```
+Now we can create a heatmap for the given target observable, and heatmapping method. Edit `heatmap.py` so that `model_save_file_mapping1` points to the correct save file for each target. There are several savefile mappings defined, to allow for quick testing of different models. Maybe not the most elegant approach, but okay. The `--model 1` option selects models from `model_save_file_mapping1`, while specifying `--model 2` would select models from `model_save_file_mapping2`, and so on. 
+
+```bash
+mkdir plots 
 python heatmaps.py --observable qt --method saliency --model 1 --event_index 0-10
 ```
+Description of available options:
+ - `-ei / --event_index` option specifies which test events to make plots for. Use `--event_index 0` to plot only the first ECG sample (we use zero-indexing), or `--event_index 0-10` to plot all samples from 0 to 10.
+ - `-p / --no_show`: Don't open plots in a new window
+ - `-s / --save`: Save the plots as PDF and PNG. Filenames are created on basis of input options
+ - `-mc / merge_channels`: Select between
+   - `none`: Show all 12 leads separately with separate heatmaps 
+   - `average`: Plot lead V5, with an average heatmap of all channels overlaid
+   - `v5_only`: Plot only lead V5, with heatmap corresponding only to lead V5
+ - `-od / output_dir`: Where to save the plots, default "plots"
 
-Create all heatmaps for all methods and observables
+
+Remember that to be able to see the plots, you must have an X server running (i.e. have connected to eX3 using `ssh -Y`). Otherwise, save the plots and open them afterwards. 
+
+Create all heatmaps for all methods and observables on the batch system:
 ```
 sbatch create_heatmap_plots.sh
 ```
 
-Run region perturbation procedure for objective evaluation of heatmaps
+Run the region perturbation procedure, for an objective evaluation of heatmaps. This computes results and saves them to the `error_analysis` directory, but does not create the final plots.
 ```
 python compare_heatmaps.py compute_errors --observable qt --num_iterations 300 --event_limit 1000 --output_dir error_analysis
 ```
 
-Run region perturbation for all observables
+Run region perturbation for all observables on the batch system:
 ```
 sbatch compare_heatmaps.py
 ```
 
-Plot results from above
+Create the comparison plots, using results generated above:
 ```
 python compare_heatmaps.py plot_comparison --observable qt --input_dir error_analysis --output_dir plots
 ```
