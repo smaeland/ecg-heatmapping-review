@@ -45,9 +45,9 @@ declare -a observables=(
     "VentRate"
 )
 event_indices="0-50"
-model="4"
+model="1"
 output_dir="plots/heatmaps/apr29/model${model}"
-merge_channels="average"
+merge_channels="none"
 
 for method in "${method_names[@]}"; do
     for obs in "${observables[@]}"; do

@@ -243,7 +243,7 @@ if __name__ == '__main__':
             'integrated_gradients': 'Integrated gradients',
             'gradientshap': 'Gradient SHAP',
             'random': 'Random',
-            #'guided_gradcam': 'Guided Grad-CAM',
+            'guided_gradcam': 'Guided Grad-CAM',
         }
 
         input_dir = Path(args.input_dir)
@@ -300,8 +300,16 @@ if __name__ == '__main__':
             ax_mape.plot(xvals, mape, label=title, linewidth=2)
             ax_mape_wide.plot(xvals, mape, label=title, linewidth=2)
             #ax_mape.fill_between(xvals, mape - std_mape, mape + std_mape, alpha=0.1)
-
             #ax_rmse.plot(xvals, rmse, label=title, linewidth=2)
+
+            # Compute area under curve
+            endpts = [5, 10, 15, 25]
+            auc_str = ''
+            for endpt in endpts:
+                auc = np.trapz(mape[:endpt+1])
+                auc_str += 'AUC-{} = {:.2f}  '.format(endpt, auc)
+
+            print('{:25}: {}'.format(title, auc_str))
 
 
         def set_axes_info(ax, ylabel):
