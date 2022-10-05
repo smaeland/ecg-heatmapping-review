@@ -50,6 +50,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-t', '--target', type=str, help='Target label name', required=True)
     parser.add_argument('-o', '--output_name_tag', required=True)
+    parser.add_argument('-cp', '--save_checkpoints', action='store_true')
     args = parser.parse_args()
 
 
@@ -153,19 +154,20 @@ if __name__ == '__main__':
         time1 = datetime.now()
 
         # Save checkpoint
-        if (i > 40) and (i % 2 == 0):
-            chkpt_path = model_save_file.replace('.pt', f'_checkpoint_ep_{i}.pt')
-            chkpt_path = chkpt_path.replace('models/', 'models/checkpoints/')
-            torch.save(
-                {
-                    'epoch': i,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'train_loss': avg_train_loss,
-                    'val_loss': avg_val_loss
-                },
-                chkpt_path
-            )
+        if args.save_checkpoint:
+            if (i > 40) and (i % 2 == 0):
+                chkpt_path = model_save_file.replace('.pt', f'_checkpoint_ep_{i}.pt')
+                chkpt_path = chkpt_path.replace('models/', 'models/checkpoints/')
+                torch.save(
+                    {
+                        'epoch': i,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'train_loss': avg_train_loss,
+                        'val_loss': avg_val_loss
+                    },
+                    chkpt_path
+                )
 
     torch.save(model.state_dict(), model_save_file)
     print('Saved model as', model_save_file)

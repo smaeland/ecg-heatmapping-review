@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=0-08:00:00
 #SBATCH --gres=gpu:1
-#SBATCH -p a100q
+#SBATCH -p dgx2q
 
 echo "Loading modules"
 module use /cm/shared/ex3-modules/latest/modulefiles
@@ -17,7 +17,7 @@ if [ ! -f /usr/lib/x86_64-linux-gnu/libevent_core-2.1.so.6 ]; then
 fi
 
 # 'VentRate', 'qt', 'pr', 'qrs', 'STJ_v5', 'T_PeakAmpl_v5', 'R_PeakAmpl_v5'
-srun python train_medians.py -t qt -o stevennet_take5
+srun python train_medians.py -t qt -o stevennet_take5_x
 #srun python train_medians.py -t pr -o stevennet_take5
 #srun python train_medians.py -t qrs -o stevennet_take5
 #srun python train_medians.py -t STJ_v5 -o stevennet_take5
